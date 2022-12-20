@@ -1,0 +1,34 @@
+{
+  "name": "plesk/ext-laravel-integration",
+  "description": "Plesk Laravel Toolkit integration with Laravel applications.",
+  "type": "library",
+  "license": "Apache-2.0",
+  "keywords": [
+    "Laravel",
+    "Plesk"
+  ],
+  "require": {
+    "php": ">=7.4",
+    "laravel/framework": ">=7.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "PleskExtLaravel\\": "src/"
+    }
+  },
+  "extra": {
+    "component": "package",
+    "laravel": {
+      "providers": [
+        "PleskExtLaravel\\Providers\\ConsoleServiceProvider"
+      ]
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "7.4.0"
+    },
+    "sort-packages": true
+  },
+  "prefer-stable": true
+}
