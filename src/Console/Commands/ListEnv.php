@@ -23,9 +23,6 @@ class ListEnv extends Command
         $parameters = [];
         foreach (self::CONFIG_PARAMETERS_MAP as $key => $name) {
             $value = config($key);
-            if (is_null($value)) {
-                continue;
-            }
 
             if (is_bool($value)) {
                 $value = $value ? 'true' : 'false';
