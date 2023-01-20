@@ -2,19 +2,18 @@
 
 [![Apache 2](http://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This package adds the ability to use a queue for your Laravel application hosted in Plesk with installed the Laravel Toolkit extension.
-Schedule your queue worker without going to the console and making changes to the Laravel Application source code. Enable/disable, configure the queue worker directly from the Plesk Laravel Toolkit interface.
+This package adds Laravel Queues to the Laravel Toolkit extension by Plesk. With the help of this package, one can enable, disable, and configure the Laravel Queue Worker directly from the Plesk UI without having to access the Laravel Application using an SSH console.
 
-### Installing and configuration
+### Installation and Configuration
 
-1. Add Plesk Laravel Toolkit integration package
+Before you start, take into account the following:
 
-    Plesk Laravel Toolkit integration package requires Laravel v7.0.0 and above. Use composer to install package to your Laravel Application
+-  Plesk Laravel Toolkit integration package works with Laravel version 7.0.0 and later.
+-  Laravel Toolkit integration package supports auto package discovery for Laravel version 7.0 and later. In this case, registration of the service provider is not required.
 
-    ```
-    composer require plesk/ext-laravel-integration
-    ```
 
-    > Laravel Toolkit integration package supports auto package discovery for Laravel v7.0+, therefore service provider registration is not required.
-2. [Enable Scheduled Tasks](https://docs.plesk.com/en-US/obsidian/administrator-guide/website-management/laravel-toolkit.80010/#viewing-your-application-s-scheduled-tasks)
-3. Enable Queue
+Here’s how to add Laravel Queues to Plesk Laravel Toolkit:
+
+1. [Integrate the Queue Laravel package into Plesk](https://support.plesk.com/hc/en-us/articles/9574602107410)
+2. [Enable the Scheduled Tasks](https://docs.plesk.com/en-US/obsidian/administrator-guide/website-management/laravel-toolkit.80010/#viewing-your-application-s-scheduled-tasks).
+3. Enable Queues in Laravel Toolkit. To do so, go to ***Websites & Domains** > your domain > **Manage Laravel Application**, and then on the "Dashboard" tab, click the **Queues** toggle button so that it shows "Enabled".
