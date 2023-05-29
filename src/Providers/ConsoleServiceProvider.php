@@ -21,9 +21,12 @@ class ConsoleServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $configSource = $this->ensureConfigSource();
+        if (!config('plesk-ext-laravel.config-source')) {
+            $configSource = $this->ensureConfigSource();
+            config()->set('plesk-ext-laravel.config-source', $configSource);
+        }
+
         $this->mergeConfigFrom(self::PLESK_EXT_LARAVEL_CONFIG_PATH, 'plesk-ext-laravel');
-        config()->set('plesk-ext-laravel.config-source', $configSource);
 
         $this->commands([
             ListEnv::class,
