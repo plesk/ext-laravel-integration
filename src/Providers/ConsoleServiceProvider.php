@@ -22,6 +22,8 @@ class ConsoleServiceProvider extends ServiceProvider
     public function register()
     {
         $configSource = $this->ensureConfigSource();
+        /** Add publish method for configuration file */
+        $this->publishes([module_path(self::PLESK_EXT_LARAVEL_CONFIG_PATH, 'config/plesk-ext-laravel.php') => config_path('plesk-ext-laravel.php')], 'plesk-ext-laravel-config');
         $this->mergeConfigFrom(self::PLESK_EXT_LARAVEL_CONFIG_PATH, 'plesk-ext-laravel');
         config()->set('plesk-ext-laravel.config-source', $configSource);
 

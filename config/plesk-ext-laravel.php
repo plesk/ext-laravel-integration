@@ -12,6 +12,8 @@ return [
             'max-jobs' => env('PLESK_EXT_LARAVEL_QUEUE_WORKER_MAX_JOBS'),
             // The maximum number of seconds the worker should run. Default: 0 (unlimited)
             'max-time' => env('PLESK_EXT_LARAVEL_QUEUE_WORKER_MAX_TIME'),
+            // Set list of queues divided by comma to execute. Example: default,orders,exports
+            'queue' => env('PLESK_EXT_LARAVEL_QUEUE_WORKER_LIST', 'default')
         ],
     ],
 ];
