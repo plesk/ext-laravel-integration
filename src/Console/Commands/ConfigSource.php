@@ -3,6 +3,7 @@
 namespace PleskExtLaravel\Console\Commands;
 
 use Illuminate\Console\Command;
+use PleskExtLaravel\PleskEnv;
 
 class ConfigSource extends Command
 {
@@ -12,6 +13,6 @@ class ConfigSource extends Command
 
     public function handle()
     {
-        $this->line(config('plesk-ext-laravel.config-source'));
+        $this->line(PleskEnv::configSource());
     }
 }

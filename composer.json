@@ -11,9 +11,17 @@
     "php": ">=7.4",
     "laravel/framework": ">=7.0.0"
   },
+  "require-dev": {
+    "orchestra/testbench": "10.0"
+  },
   "autoload": {
     "psr-4": {
       "PleskExtLaravel\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PleskExtLaravel\\Tests\\": "tests/"
     }
   },
   "extra": {
@@ -25,10 +33,10 @@
     }
   },
   "config": {
-    "platform": {
-      "php": "7.4.0"
-    },
     "sort-packages": true
+  },
+  "scripts": {
+    "test": "phpunit"
   },
   "prefer-stable": true
 }

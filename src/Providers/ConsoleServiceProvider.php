@@ -2,29 +2,16 @@
 
 namespace PleskExtLaravel\Providers;
 
-use Dotenv\Dotenv;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
-use InvalidArgumentException;
 use PleskExtLaravel\Console\Commands\ConfigSource;
 use PleskExtLaravel\Console\Commands\ListEnv;
-use Psr\Container\ContainerExceptionInterface;
+use PleskExtLaravel\PleskEnv;
 
 class ConsoleServiceProvider extends ServiceProvider
 {
-    private const PLESK_EXT_LARAVEL_CONFIG_PATH = __DIR__ . '/../../config/plesk-ext-laravel.php';
-    private const PLESK_ENV_FILE_NAME = '.env.plesk';
-    private const ENV_SOURCE_LARAVEL_APP = 'laravel-app';
-    private const ENV_SOURCE_LARAVEL_ENV = 'laravel-environment';
-    private const ENV_SOURCE_PLESK_ENV = 'plesk-environment';
-    private const ENV_SOURCE_DEFAULT = 'default';
-
     public function register()
     {
-        $configSource = $this->ensureConfigSource();
-        $this->mergeConfigFrom(self::PLESK_EXT_LARAVEL_CONFIG_PATH, 'plesk-ext-laravel');
-        config()->set('plesk-ext-laravel.config-source', $configSource);
-
         $this->commands([
             ListEnv::class,
             ConfigSource::class,
@@ -34,57 +21,72 @@ class ConsoleServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->app->resolving(Schedule::class, function ($schedule) {
-            if (config('plesk-ext-laravel.queue-worker.enabled', false)) {
-                $this->schedule($schedule);
-            }
+            $this->schedule($schedule);
         });
     }
 
     /**
-     * @throws ContainerExceptionInterface
+     * Register the queue workers, supporting both the multi-queue scheme
+     * (PLESK_EXT_LARAVEL_QUEUE_LIST) and the legacy single-worker variables.
      */
     public function schedule(Schedule $schedule)
     {
-        $schedule->command(join(' ', ['queue:work', $this->getQueueScheduleParams()]))
-            ->withoutOverlapping()
-            ->everyMinute();
-    }
+        if (PleskEnv::isMultiQueue()) {
+            $this->scheduleQueues($schedule);
 
-    private function ensureConfigSource(): string
-    {
-        if (config('plesk-ext-laravel.queue-worker.enabled') !== null) {
-            return self::ENV_SOURCE_LARAVEL_APP;
+            return;
         }
 
-        if (env('PLESK_EXT_LARAVEL_QUEUE_WORKER_ENABLED') !== null) {
-            return self::ENV_SOURCE_LARAVEL_ENV;
-        }
-
-        try {
-            Dotenv::createImmutable(base_path(), self::PLESK_ENV_FILE_NAME)->load();
-            if (env('PLESK_EXT_LARAVEL_QUEUE_WORKER_ENABLED') !== null) {
-                return self::ENV_SOURCE_PLESK_ENV;
-            }
-        } catch (InvalidArgumentException $ignore) {
-            // do nothing
-        }
-
-        return self::ENV_SOURCE_DEFAULT;
+        $this->scheduleLegacyWorker($schedule);
     }
 
     /**
-     * @throws ContainerExceptionInterface
+     * Schedule one "queue:work" per parallel worker for every enabled queue.
+     *
+     * Each worker gets a unique --name so its command string (and therefore its
+     * withoutOverlapping mutex) is distinct, allowing COUNT workers to run in
+     * parallel. runInBackground() lets a single schedule:run tick launch them
+     * all without running them sequentially.
      */
-    private function getQueueScheduleParams(): string
+    private function scheduleQueues(Schedule $schedule): void
     {
-        $params = array_filter(config()->get('plesk-ext-laravel.queue-worker.params'));
+        foreach (PleskEnv::queues() as $queue) {
+            if (!PleskEnv::isEnabled($queue)) {
+                continue;
+            }
 
-        return join(' ', array_map(
-            fn ($paramValue, $paramName) => is_bool($paramValue)
-                ? "--$paramName"
-                : "--$paramName=$paramValue",
-            $params,
-            array_keys($params)
-        ));
+            $flags = PleskEnv::flags($queue);
+            $count = PleskEnv::count($queue);
+
+            for ($i = 0; $i < $count; $i++) {
+                $command = array_merge(
+                    ['queue:work'],
+                    $flags,
+                    ["--queue={$queue}", "--name=queue-worker-{$queue}-{$i}"]
+                );
+
+                $schedule->command(implode(' ', $command))
+                    ->withoutOverlapping()
+                    ->runInBackground()
+                    ->everyMinute();
+            }
+        }
+    }
+
+    /**
+     * Schedule the legacy single worker (no --queue, i.e. the default queue),
+     * matching the behaviour of previous versions.
+     */
+    private function scheduleLegacyWorker(Schedule $schedule): void
+    {
+        if (!PleskEnv::legacyEnabled()) {
+            return;
+        }
+
+        $command = array_merge(['queue:work'], PleskEnv::legacyFlags());
+
+        $schedule->command(implode(' ', $command))
+            ->withoutOverlapping()
+            ->everyMinute();
     }
 }
