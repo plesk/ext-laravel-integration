@@ -18,6 +18,7 @@ class ListEnvCommandTest extends TestCase
 
         $this->artisan('plesk-ext-laravel:list-env')
             ->expectsTable(['Parameter', 'Value'], [
+                ['PLESK_EXT_LARAVEL_QUEUE_MULTIPLE_SUPPORTED', 'true'],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_ENABLED', 'true'],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_STOP_WHEN_EMPTY', 'true'],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_TIMEOUT', '1'],
@@ -31,6 +32,7 @@ class ListEnvCommandTest extends TestCase
     {
         $this->artisan('plesk-ext-laravel:list-env')
             ->expectsTable(['Parameter', 'Value'], [
+                ['PLESK_EXT_LARAVEL_QUEUE_MULTIPLE_SUPPORTED', 'true'],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_ENABLED', 'false'],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_STOP_WHEN_EMPTY', ''],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_TIMEOUT', ''],
@@ -51,6 +53,7 @@ class ListEnvCommandTest extends TestCase
 
         $this->artisan('plesk-ext-laravel:list-env')
             ->expectsTable(['Parameter', 'Value'], [
+                ['PLESK_EXT_LARAVEL_QUEUE_MULTIPLE_SUPPORTED', 'true'],
                 ['PLESK_EXT_LARAVEL_QUEUE_LIST', 'mail,notifications'],
                 ['PLESK_EXT_LARAVEL_QUEUE_MAIL_ENABLED', 'true'],
                 ['PLESK_EXT_LARAVEL_QUEUE_MAIL_COUNT', '3'],
