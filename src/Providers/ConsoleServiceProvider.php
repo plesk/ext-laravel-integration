@@ -6,6 +6,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use PleskExtLaravel\Console\Commands\ConfigSource;
 use PleskExtLaravel\Console\Commands\ListEnv;
+use PleskExtLaravel\Console\Commands\MigrateEnv;
 use PleskExtLaravel\PleskEnv;
 
 class ConsoleServiceProvider extends ServiceProvider
@@ -15,6 +16,7 @@ class ConsoleServiceProvider extends ServiceProvider
         $this->commands([
             ListEnv::class,
             ConfigSource::class,
+            MigrateEnv::class,
         ]);
     }
 
