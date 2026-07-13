@@ -3,6 +3,7 @@
 namespace PleskExtLaravel;
 
 use Dotenv\Dotenv;
+use Illuminate\Support\Env;
 
 /**
  * Reads Plesk queue configuration directly from the .env.plesk file.
@@ -80,13 +81,13 @@ class PleskEnv
     {
         self::load();
 
-        $value = $_ENV[$name] ?? $_SERVER[$name] ?? getenv($name);
+        $value = Env::getRepository()->get($name);
 
-        if ($value === false || $value === null || $value === '') {
+        if ($value === null || $value === '') {
             return null;
         }
 
-        return (string) $value;
+        return $value;
     }
 
     /**
