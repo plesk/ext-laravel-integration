@@ -7,6 +7,8 @@ use PleskExtLaravel\PleskEnv;
 
 class ListEnv extends Command
 {
+    private const MULTIPLE_QUEUES_SUPPORTED = 'PLESK_EXT_LARAVEL_QUEUE_MULTIPLE_SUPPORTED';
+
     protected $signature = 'plesk-ext-laravel:list-env';
 
     protected $description = 'Display environment variables set for Plesk Laravel Toolkit extension integration.';
@@ -16,6 +18,11 @@ class ListEnv extends Command
         $parameters = PleskEnv::isMultiQueue()
             ? $this->multiQueueParameters()
             : $this->legacyParameters();
+
+        array_unshift($parameters, [
+            'parameter' => self::MULTIPLE_QUEUES_SUPPORTED,
+            'value' => 'true',
+        ]);
 
         $this->table(['Parameter', 'Value'], $parameters);
     }
