@@ -92,7 +92,19 @@ class ScheduleTest extends TestCase
 
     public function testNothingIsScheduledWhenLegacyWorkerDisabled(): void
     {
-        // No PLESK_EXT_LARAVEL_QUEUE_* variables set at all.
+        // Legacy structure (a WORKER_* variable present, no queue list) with the
+        // worker explicitly disabled -> nothing is scheduled.
+        $this->setPleskEnv([
+            'PLESK_EXT_LARAVEL_QUEUE_WORKER_ENABLED' => 'false',
+        ]);
+
+        $this->assertCount(0, $this->queueWorkerCommands());
+    }
+
+    public function testNothingIsScheduledWithoutAnyConfiguration(): void
+    {
+        // No PLESK_EXT_LARAVEL_QUEUE_* variables at all: legacy mode with the
+        // worker not enabled -> no workers.
         $this->assertCount(0, $this->queueWorkerCommands());
     }
 

@@ -91,22 +91,54 @@ class PleskEnv
     }
 
     /**
-     * Whether the multi-queue scheme is configured (the queue list is present).
-     * When false, the legacy single-worker variables should be used instead.
+     * Whether the multi-queue format applies. True only when the
+     * PLESK_EXT_LARAVEL_QUEUE_LIST key is explicitly present in the file (an
+     * empty "PLESK_EXT_LARAVEL_QUEUE_LIST=" still counts). A missing or empty
+     * file, or a legacy-only file, falls back to the legacy single-worker
+     * format. This is what the Plesk extension keys on: the queue-list row
+     * appears in the output only for the new format.
      */
     public static function isMultiQueue(): bool
     {
-        return self::get(self::LIST_VAR) !== null;
+        return self::hasQueueList();
     }
 
     /**
-     * Where the queue configuration comes from. Reads .env.plesk directly, so
-     * the result is either "plesk-environment" (any queue setting present) or
-     * "default" (nothing configured).
+     * Whether the PLESK_EXT_LARAVEL_QUEUE_LIST key is defined, regardless of its
+     * value (an empty value still counts as present).
+     */
+    public static function hasQueueList(): bool
+    {
+        self::load();
+
+        return Env::getRepository()->has(self::LIST_VAR);
+    }
+
+    /**
+     * Whether any legacy single-worker variable is defined.
+     */
+    private static function hasLegacyConfig(): bool
+    {
+        self::load();
+
+        $repository = Env::getRepository();
+        foreach (self::legacyParameterNames() as $name) {
+            if ($repository->has($name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Where the queue configuration comes from: "plesk-environment" when any
+     * queue configuration is present (the queue-list key or a legacy variable),
+     * otherwise "default".
      */
     public static function configSource(): string
     {
-        if (self::isMultiQueue() || self::get(self::LEGACY_ENABLED) !== null) {
+        if (self::hasQueueList() || self::hasLegacyConfig()) {
             return self::SOURCE_PLESK_ENV;
         }
 

@@ -30,6 +30,28 @@ class ListEnvCommandTest extends TestCase
 
     public function testLegacyOutputDefaultsEnabledToFalseWhenUnset(): void
     {
+        // Legacy structure: a WORKER_* variable is present and there is no
+        // queue-list key, so the enabled flag is unset and shown as "false".
+        $this->setPleskEnv([
+            'PLESK_EXT_LARAVEL_QUEUE_WORKER_TIMEOUT' => '5',
+        ]);
+
+        $this->artisan('plesk-ext-laravel:list-env')
+            ->expectsTable(['Parameter', 'Value'], [
+                ['PLESK_EXT_LARAVEL_QUEUE_MULTIPLE_SUPPORTED', 'true'],
+                ['PLESK_EXT_LARAVEL_QUEUE_WORKER_ENABLED', 'false'],
+                ['PLESK_EXT_LARAVEL_QUEUE_WORKER_STOP_WHEN_EMPTY', ''],
+                ['PLESK_EXT_LARAVEL_QUEUE_WORKER_TIMEOUT', '5'],
+                ['PLESK_EXT_LARAVEL_QUEUE_WORKER_MAX_JOBS', ''],
+                ['PLESK_EXT_LARAVEL_QUEUE_WORKER_MAX_TIME', ''],
+            ])
+            ->assertExitCode(0);
+    }
+
+    public function testEmptyEnvironmentOutputsLegacyFormat(): void
+    {
+        // No .env.plesk / nothing configured -> legacy format (no queue-list
+        // row), so the extension treats it as the old package.
         $this->artisan('plesk-ext-laravel:list-env')
             ->expectsTable(['Parameter', 'Value'], [
                 ['PLESK_EXT_LARAVEL_QUEUE_MULTIPLE_SUPPORTED', 'true'],
@@ -38,6 +60,22 @@ class ListEnvCommandTest extends TestCase
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_TIMEOUT', ''],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_MAX_JOBS', ''],
                 ['PLESK_EXT_LARAVEL_QUEUE_WORKER_MAX_TIME', ''],
+            ])
+            ->assertExitCode(0);
+    }
+
+    public function testExplicitEmptyQueueListOutputsMultiQueueFormat(): void
+    {
+        // Only "PLESK_EXT_LARAVEL_QUEUE_LIST=" present -> the new format, because
+        // the queue-list key is explicitly there.
+        $this->setPleskEnv([
+            'PLESK_EXT_LARAVEL_QUEUE_LIST' => '',
+        ]);
+
+        $this->artisan('plesk-ext-laravel:list-env')
+            ->expectsTable(['Parameter', 'Value'], [
+                ['PLESK_EXT_LARAVEL_QUEUE_MULTIPLE_SUPPORTED', 'true'],
+                ['PLESK_EXT_LARAVEL_QUEUE_LIST', ''],
             ])
             ->assertExitCode(0);
     }
